@@ -1,0 +1,131 @@
+var mongodb = require('mongodb');
+var env = JSON.parse(process.env.VCAP_SERVICES);
+
+//Api key and secret needed
+var client = require('twilio')('', '');
+
+//The API endpoint to send the message to
+var url2 = '';
+
+
+var moment=require('moment');
+
+exports.getUser = function (req, res){
+	var key = req.params.key;
+	mongodb.connect(env.mongolab[0].credentials.uri, function(err, db){
+		
+		var coll = db.collection('users');
+
+		coll.find({key:key}).toArray(function(err, cursor){
+			if(cursor){
+			   	res.json({
+					value:cursor});	
+			}
+			else{
+				res.send("error");
+			}
+		});
+	});
+}
+
+exports.addReminder = function (req, res) {
+	
+	//var currentdate = new Date();
+	var month = req.params.month;
+	if(month.length === 1){
+		month = '0'+month;
+	}
+	var day = req.params.day;
+	if(day.length === 1){
+		day = '0'+day;
+	}
+	
+	var hour = req.params.hour;
+	if(hour.length === 1){
+		hour = '0'+hour;
+	}
+
+	var minute = req.params.minute;
+	if(minute.length === 1){
+		minute = '0'+minute;
+	}
+	var date = new Date(req.params.year,month,day,hour,minute,0);
+	var datestring=req.params.year+"-"+month+"-"+day+"T"+hour+":"+minute+":00.000";
+	var code = req.params.key;
+	var reminder = req.params.reminder;
+	/*mongodb.connect(env.mongolab[0].credentials.uri, function(err, db){
+
+		if(err) res.send("error adding reminder");
+
+		var coll = db.collection('users');
+		coll.update({key:code},{$addToSet: { reminders: reminder }}, function(err, cursor){
+			res.send("Reminder successfully added");
+		});
+	});*/
+
+	/*mongodb.connect(env.mongolab[0].credentials.uri, function(err, db){
+		var reminders = db.collection('reminders');
+		
+		reminders.insert({user:code, message:reminder, time:date}, function(err, result){
+			if(err) res.send(err);
+		});
+
+	});*/
+	//OK
+	reminder = reminder.replace(/ /g, '+');
+	var phone;
+
+	var requestdate = moment(datestring);
+	var newdate = moment();
+	console.log(requestdate);
+	console.log(newdate);
+	console.log(Math.abs(requestdate.diff(newdate)));
+	mongodb.connect(env.mongolab[0].credentials.uri, function(err, db){
+		var users = db.collection('users');
+
+		users.find({key:code}).toArray(function (err, results){
+			phone = results[0].phonenumber;
+			console.log(requestdate.diff(newdate) + " is the difference between the times");
+			makeCall(phone, reminder, Math.abs(requestdate.diff(newdate)));
+			//mission accomplished
+		});
+	});
+
+	function makeCall(number, remind, delay){
+		setTimeout(function(){
+		client.makeCall({
+			to:number,
+			from:'+353768886204',
+			url:url2+"?q="+remind
+		}, function(err, responseData){
+
+		})}, delay);
+	};
+}
+
+exports.handleMessage = function(req, res){
+	var query = req.query.q;
+	/*mongodb.connect(env.mongolab[0].credentials.uri, function(err, db){
+		var reminders = db.collection('reminders');
+
+		reminders.find({_id:reminderid}).toArray(function(err, result){
+			res.set('Content-Type', 'text/xml');
+			res.send('<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="woman">'+result+'</Say></Response>');
+		});
+	});*/
+	
+	res.set('Content-Type', 'text/xml');	
+	res.send('<?xml version="1.0" encoding="UTF-8"?><Response><Say voice="woman">'+query+'</Say></Response>');
+}
+exports.testFind = function(req, res){
+	var u = req.params.u;
+	mongodb.connect(env.mongolab[0].credentials.uri, function(err, db){
+		var users = db.collection('users');
+
+		users.find({key:u}).toArray(function(err, result){
+			res.send(result[0].phonenumber);
+		});
+
+		
+	});
+}

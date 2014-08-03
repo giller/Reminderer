@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Reminderer - call yourself in the future</title>
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" />
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+  </head>
+  <body>
+    <h1 id='infoheader'>Use your access code to visit your personal Reminderer page</h1>
+    <div class="container">
+        <h2 class="center">Enter your personal code below:</h2> 
+        <form class="form-horizontal">
+            <div class="form-group">
+	    	    <input id="key" class="form-control" type='text' name='key' value='' placeholder="Code"/>
+			</div>
+	    </form>
+	    <div id='echo' class="messageInfo"></div>
+	    <div class="buttonContainer">
+	    	<button class="btn btn-primary center" id='get' onclick="submitAccessCode()">Go!</button>
+	    </div>
+		<p id="results"></p>
+	</div>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+	<script src="/js/jquery-ui-timepicker-addon.js"></script>
+	<script src="/js/mytestscript.js"></script>
+  </body>
+</html>

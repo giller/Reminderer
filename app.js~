@@ -1,0 +1,79 @@
+/* jshint node:true */
+
+/**
+ * Module dependencies.
+ */
+var express = require('express'),
+  routes = require('./routes'),
+  cache = require('./routes/cache'),
+  http = require('http'),
+  path = require('path');
+  //mongoclient = require('mongodb').MongoClient;
+var app = express();
+
+
+// all environments
+app.set('port', process.env.PORT || 3000);
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+app.use(express.favicon());
+app.use(express.logger('dev'));
+app.use(express.bodyParser());
+app.use(express.methodOverride());
+app.use(app.router);
+app.use(express.static(path.join(__dirname, 'public')));
+
+// development only
+if ('development' === app.get('env')) {
+  app.use(express.errorHandler());
+}
+
+console.log("hello");
+
+app.get('/', routes.index);
+app.get("/cache/:key", cache.getCache);
+app.put("/cache", cache.putCache);
+app.delete("/cache/:key", cache.removeCache);
+
+var userroute = require('./routes/user');
+app.get("/user/:key", userroute.getUser);
+app.post("/user/:key/:reminder&:day&:month&:year&:minute&:hour", userroute.addReminder);
+
+app.post("/message", userroute.handleMessage);
+
+app.get("/test3/:u", userroute.testFind);
+
+http.createServer(app).listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
+});
+
+
+/*checkReminders();
+function checkReminders(){
+	
+	mongodb.connect(env.mongolab[0].credentials.uri, function(err,db){
+		var coll = db.collection('reminders');
+
+		coll.find().toArray(function(err, result){
+			var length = result.length;
+			for(i = 0; i < length; i++){
+				if(result[i].time < new Date()){
+					makeCall(result[i].user, result[i].message);
+				};
+			}
+		});
+	});
+
+}
+
+function makeCall(user, message){
+	mongodb.connect(env.mongolab[0].credentials.uri, function(err, db){
+		var users = db.collection('users');
+
+		users.find({key:user}).toArray(function(err, result){
+			return result;
+		});
+
+		
+	});
+}*/
